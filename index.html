@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candle Game</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+    }
+    .game-container {
+        position: relative;
+        width: 300px;
+        height: 500px;
+        border: 2px solid #000;
+        overflow: hidden;
+    }
+    .candle {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 30px;
+    }
+    .fruit {
+        position: absolute;
+        font-size: 30px;
+    }
+    .buttons {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 0 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .score {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 24px;
+    }
+    .game-over {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 10px;
+        color: #fff;
+        text-align: center;
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <div class="candle">🕯️</div>
+</div>
+<div class="buttons">
+    <button class="button" id="leftBtn">◀️</button>
+    <button class="button" id="rightBtn">▶️</button>
+</div>
+<div class="score">Score: <span id="score">0</span></div>
+<div class="game-over" id="gameOver">
+    <p>Game Over!</p>
+    <p>Your Score: <span id="finalScore">0</span></p>
+    <button class="button" id="restartBtn">Restart</button>
+</div>
+
+<script>
+    const candle = document.querySelector('.candle');
+    const leftBtn = document.getElementById('leftBtn');
+    const rightBtn = document.getElementById('rightBtn');
+    const scoreDisplay = document.getElementById('score');
+    const gameOver = document.getElementById('gameOver');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const gameContainerWidth = document.querySelector('.game-container').offsetWidth;
+
+    let candlePosition = gameContainerWidth / 2;
+    let score = 0;
+
+    leftBtn.addEventListener('click', () => {
+        candlePosition -= 10;
+        if (candlePosition < 0) {
+            candlePosition = 0;
+        }
+        candle.style.left = candlePosition + 'px';
+    });
+
+    rightBtn.addEventListener('click', () => {
+        candlePosition += 10;
+        if (candlePosition > gameContainerWidth - candle.offsetWidth) {
+            candlePosition = gameContainerWidth - candle.offsetWidth;
+        }
+        candle.style.left = candlePosition + 'px';
+    });
+
+    // Function to create a random fruit
+    function createFruit() {
+        const fruits = ['🍓', '🍎', '🍒', '🍉', '🍊', '🥭', '🍍', '🍌', '🍑'];
+        const fruitIcon = fruits[Math.floor(Math.random() * fruits.length)];
+
+        const fruit = document.createElement('div');
+        fruit.classList.add('fruit');
+        fruit.innerHTML = fruitIcon;
+        fruit.style.left = Math.random() * (gameContainerWidth - 30) + 'px'; // Random horizontal position
+        document.querySelector('.game-container').appendChild(fruit);
+
+        // Animate the fruit falling
+        let fruitPosition = 0;
+        const fallInterval = setInterval(() => {
+            fruitPosition += 5; // Adjust the falling speed here
+            fruit.style.top = fruitPosition + 'px';
+
+            // Check if the fruit reaches the candle
+            if (fruitPosition >= 450 && fruitPosition <= 500 && Math.abs(fruit.offsetLeft - candle.offsetLeft) <= 30) {
+                // Fruit burned
+                clearInterval(fallInterval);
+                fruit.remove();
+                score++;
+                scoreDisplay.textContent = score;
+            }
+
+            // Check if the fruit misses the candle and reaches the ground
+            if (fruitPosition >= 500) {
+                // Game over
+                clearInterval(fallInterval);
+                fruit.remove();
+                gameOver.style.display = 'block';
+                finalScoreDisplay.textContent = score;
+            }
+        }, 30); // Adjust the interval for smoothness
+    }
+
+    // Start creating fruits at intervals
+    setInterval(createFruit, 3000); // Adjust the interval to control the frequency of fruit creation
+
+    // Restart the game
+    restartBtn.addEventListener('click', () => {
+        gameOver.style.display = 'none';
+        score = 0;
+        scoreDisplay.textContent = score;
+    });
+</script>
+
+</body>
+</html>
